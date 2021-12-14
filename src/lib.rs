@@ -51,12 +51,26 @@ mod tests {
         ],
                    search(query, contents))
     }
+
+    #[test]
+    fn case_sensitive() {
+        let query = "a";
+
+        let contents = "\
+       a
+       b
+       c
+        ";
+
+        assert_eq!(vec!["a"], search(query, contents))
+    }
 }
 
 fn search<'a>(query: &str, contents: &'a str) -> Vec<&'a str> {
     let mut result = Vec::new();
+    let query = query.to_lowercase();
     for line in contents.lines() {
-        if line.contains(query) {
+        if line.to_lowercase().contains(&query) {
             result.push(line)
         }
     }
