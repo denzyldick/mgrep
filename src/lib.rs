@@ -1,5 +1,6 @@
 use std::error::Error;
 use std::fs;
+use std::env;
 
 pub struct Config {
     pub query: String,
@@ -7,12 +8,18 @@ pub struct Config {
 }
 
 impl Config {
-    pub fn new(args: &[String]) -> Result<Config, &str> {
-        if args.len() < 3 {
-            return Err("You must provider a pattern and a file.");
-        }
-        let query = args[1].clone();
-        let filename = args[2].clone();
+    pub fn new(mut args: env::Args) -> Result<Config, &'static str> {
+        args.next();
+        let query = match args.next() {
+            Some(arg) => arg,
+            None => return Err("No query specified"),
+        };
+
+        let filename = match args.next() {
+            Some(arg) => arg,
+            None => return Err("No filename specified"),
+        };
+
         Ok(Config { query, filename })
     }
 }
@@ -67,12 +74,7 @@ mod tests {
 }
 
 fn search<'a>(query: &str, contents: &'a str) -> Vec<&'a str> {
-    let mut result = Vec::new();
-    let query = query.to_lowercase();
-    for line in contents.lines() {
-        if line.to_lowercase().contains(&query) {
-            result.push(line)
-        }
-    }
-    return result;
+    contents.lines()
+        .filter(|line| line.to_lowercase().contains(query.to_lowercase()))
+        .collect()
 }
